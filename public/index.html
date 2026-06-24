@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SpendSmart AI — Your intelligent personal finance advisor. Analyze spending, get AI insights, and achieve your financial goals with India-focused advice." />
+  <title>SpendSmart AI — Smart Personal Finance Advisor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ─── BACKGROUND ORBS ───────────────────────────────────────────── -->
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+<div class="bg-orb orb-3"></div>
+
+<!-- ─── SIDEBAR NAV ───────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">💰</div>
+    <div>
+      <div class="brand-name">SpendSmart</div>
+      <div class="brand-tag">AI Finance Advisor</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" data-section="dashboard" id="nav-dashboard">
+      <span class="nav-icon">🏠</span>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-btn" data-section="profile" id="nav-profile">
+      <span class="nav-icon">👤</span>
+      <span>My Profile</span>
+    </button>
+    <button class="nav-btn" data-section="analysis" id="nav-analysis">
+      <span class="nav-icon">📊</span>
+      <span>Analysis</span>
+    </button>
+    <button class="nav-btn" data-section="chat" id="nav-chat">
+      <span class="nav-icon">🤖</span>
+      <span>AI Chat</span>
+      <span class="nav-badge" id="chat-badge" style="display:none">●</span>
+    </button>
+    <button class="nav-btn" data-section="history" id="nav-history">
+      <span class="nav-icon">📅</span>
+      <span>History</span>
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="api-status" id="api-status">
+      <span class="status-dot"></span>
+      <span class="status-text">Connecting…</span>
+    </div>
+    <div class="session-id-label">Session ID</div>
+    <div class="session-id-value" id="session-display">—</div>
+  </div>
+</aside>
+
+<!-- ─── HAMBURGER (mobile) ─────────────────────────────────────────── -->
+<button class="hamburger" id="hamburger" aria-label="Toggle menu">☰</button>
+
+<!-- ─── MAIN CONTENT ─────────────────────────────────────────────── -->
+<main class="main-content">
+
+  <!-- ══════════════════════════════════════════════ DASHBOARD ══ -->
+  <section class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Welcome back, <span id="dash-name">there</span> 👋</h1>
+        <p class="page-subtitle">Here's your financial snapshot for this month</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="btn-quick-analyze">
+          <span>⚡</span> Quick Analyze
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid" id="dash-stats">
+      <div class="stat-card" id="stat-income">
+        <div class="stat-icon" style="background: linear-gradient(135deg,#10b981,#059669)">💼</div>
+        <div class="stat-body">
+          <div class="stat-label">Monthly Income</div>
+          <div class="stat-value" id="dash-income">₹—</div>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-expenses">
+        <div class="stat-icon" style="background: linear-gradient(135deg,#f59e0b,#d97706)">🛒</div>
+        <div class="stat-body">
+          <div class="stat-label">Total Expenses</div>
+          <div class="stat-value" id="dash-expenses">₹—</div>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-savings">
+        <div class="stat-icon" style="background: linear-gradient(135deg,#6366f1,#4f46e5)">💎</div>
+        <div class="stat-body">
+          <div class="stat-label">Monthly Savings</div>
+          <div class="stat-value" id="dash-savings">₹—</div>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-health">
+        <div class="stat-icon" style="background: linear-gradient(135deg,#ec4899,#db2777)">🧠</div>
+        <div class="stat-body">
+          <div class="stat-label">AI Health Score</div>
+          <div class="stat-value" id="dash-health">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Banner -->
+    <div class="status-banner hidden" id="status-banner">
+      <div class="banner-icon" id="banner-icon">🟢</div>
+      <div class="banner-content">
+        <div class="banner-title" id="banner-title">Financial Status</div>
+        <div class="banner-text" id="banner-text">Run an analysis to see your financial health.</div>
+      </div>
+      <div class="banner-badge" id="banner-badge">—</div>
+    </div>
+
+    <!-- Expense Breakdown & Forecast side-by-side -->
+    <div class="dashboard-grid">
+      <div class="card" id="expense-chart-card">
+        <div class="card-header">
+          <h2 class="card-title">Expense Breakdown</h2>
+          <span class="card-badge" id="chart-total">₹0</span>
+        </div>
+        <div class="chart-wrapper" id="expense-chart">
+          <div class="empty-chart">
+            <div class="empty-icon">📊</div>
+            <p>Enter your profile data to see the expense breakdown</p>
+          </div>
+        </div>
+        <div class="chart-legend" id="chart-legend"></div>
+      </div>
+
+      <div class="card" id="forecast-card">
+        <div class="card-header">
+          <h2 class="card-title">6-Month Savings Forecast</h2>
+          <span class="card-badge">AI Projected</span>
+        </div>
+        <div class="forecast-bars" id="forecast-bars">
+          <div class="empty-chart">
+            <div class="empty-icon">📈</div>
+            <p>Run analysis to see your savings forecast</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick tips -->
+    <div class="card" id="tips-card">
+      <div class="card-header">
+        <h2 class="card-title">💡 Financial Tips</h2>
+      </div>
+      <div class="tips-grid" id="tips-grid">
+        <div class="tip-item">
+          <span class="tip-icon">💰</span>
+          <span>Build an emergency fund covering 6 months of expenses before investing.</span>
+        </div>
+        <div class="tip-item">
+          <span class="tip-icon">📊</span>
+          <span>Use the 50-30-20 rule: 50% needs, 30% wants, 20% savings/investments.</span>
+        </div>
+        <div class="tip-item">
+          <span class="tip-icon">🏦</span>
+          <span>Automate savings via SIP on the 1st of every month — 'pay yourself first'.</span>
+        </div>
+        <div class="tip-item">
+          <span class="tip-icon">📑</span>
+          <span>Maximize your 80C deductions (₹1.5L limit) via PPF, ELSS, or Life Insurance.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ PROFILE ══════ -->
+  <section class="page" id="page-profile">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">My Financial Profile</h1>
+        <p class="page-subtitle">Enter your income and expense details for AI-powered analysis</p>
+      </div>
+    </div>
+
+    <div class="profile-layout">
+      <div class="card profile-card">
+        <form id="profile-form" novalidate>
+          <!-- Personal -->
+          <div class="form-section-title">Personal Details</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="inp-name">Your Name</label>
+              <input class="form-input" type="text" id="inp-name" placeholder="e.g. Arpit" maxlength="50" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inp-language">Preferred Language</label>
+              <select class="form-input" id="inp-language">
+                <option value="en">English</option>
+                <option value="hi">हिंदी (Hindi)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Income -->
+          <div class="form-section-title">Monthly Income (₹)</div>
+          <div class="form-group">
+            <label class="form-label" for="inp-income">Take-Home Income <span class="required">*</span></label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input class="form-input prefixed" type="number" id="inp-income" placeholder="50000" min="0" required />
+            </div>
+          </div>
+
+          <!-- Expenses -->
+          <div class="form-section-title">Monthly Expenses (₹)</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="inp-rent">🏠 Rent / Housing</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input class="form-input prefixed expense-input" type="number" id="inp-rent" placeholder="0" min="0" data-key="rent" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inp-food">🍽️ Food & Groceries</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input class="form-input prefixed expense-input" type="number" id="inp-food" placeholder="0" min="0" data-key="food" />
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="inp-travel">🚌 Travel & Transport</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input class="form-input prefixed expense-input" type="number" id="inp-travel" placeholder="0" min="0" data-key="travel" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inp-shopping">🛍️ Shopping</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input class="form-input prefixed expense-input" type="number" id="inp-shopping" placeholder="0" min="0" data-key="shopping" />
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="inp-bills">⚡ Bills & Utilities</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input class="form-input prefixed expense-input" type="number" id="inp-bills" placeholder="0" min="0" data-key="bills" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inp-emi">🏦 EMI / Loan</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input class="form-input prefixed expense-input" type="number" id="inp-emi" placeholder="0" min="0" data-key="emi" />
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="inp-others">💼 Other Expenses</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input class="form-input prefixed expense-input" type="number" id="inp-others" placeholder="0" min="0" data-key="others" />
+            </div>
+          </div>
+
+          <!-- Savings Goal -->
+          <div class="form-section-title">Savings Goal (Optional)</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="inp-goal-amount">Target Amount (₹)</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input class="form-input prefixed" type="number" id="inp-goal-amount" placeholder="200000" min="0" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inp-goal-months">Target Duration (months)</label>
+              <input class="form-input" type="number" id="inp-goal-months" placeholder="12" min="1" max="360" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="inp-goal-desc">Goal Description</label>
+            <input class="form-input" type="text" id="inp-goal-desc" placeholder="e.g. New car, vacation, emergency fund" maxlength="100" />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-save-profile">
+              <span class="btn-icon">💾</span>
+              <span class="btn-text">Save & Calculate</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Live preview -->
+      <div class="profile-preview">
+        <div class="card preview-card">
+          <div class="card-header">
+            <h2 class="card-title">Live Summary</h2>
+          </div>
+          <div class="preview-item">
+            <span>Total Expenses</span>
+            <strong id="prev-expenses">₹0</strong>
+          </div>
+          <div class="preview-item">
+            <span>Monthly Savings</span>
+            <strong id="prev-savings" class="positive">₹0</strong>
+          </div>
+          <div class="preview-item">
+            <span>Savings Rate</span>
+            <strong id="prev-rate">0%</strong>
+          </div>
+          <div class="savings-meter">
+            <div class="meter-bar">
+              <div class="meter-fill" id="prev-meter" style="width:0%"></div>
+            </div>
+            <div class="meter-labels">
+              <span>0%</span><span>50%</span><span>100%</span>
+            </div>
+          </div>
+          <div class="preview-status" id="prev-status">Enter your details →</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ ANALYSIS ═════ -->
+  <section class="page" id="page-analysis">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Financial Analysis</h1>
+        <p class="page-subtitle">AI-powered deep dive into your financial health</p>
+      </div>
+      <button class="btn btn-primary" id="btn-run-analysis">
+        <span>🔍</span> Run Analysis
+      </button>
+    </div>
+
+    <div class="analysis-placeholder" id="analysis-placeholder">
+      <div class="placeholder-icon">🔍</div>
+      <h2>Ready to Analyze</h2>
+      <p>Save your financial profile first, then click "Run Analysis" to get your complete AI-powered financial report.</p>
+      <button class="btn btn-primary" onclick="showSection('profile')">
+        Set Up Profile →
+      </button>
+    </div>
+
+    <div class="analysis-results hidden" id="analysis-results">
+      <!-- AI Summary -->
+      <div class="card ai-summary-card" id="ai-summary-card">
+        <div class="ai-summary-header">
+          <div class="ai-avatar">🤖</div>
+          <div>
+            <div class="ai-label">AI Financial Summary</div>
+            <!-- <div class="ai-model" id="ai-model-label">Powered by Gemini</div> -->
+          </div>
+          <div class="analysis-status-badge" id="analysis-status-badge">Safe</div>
+        </div>
+        <p class="ai-summary-text" id="ai-summary-text"></p>
+      </div>
+
+      <!-- Metric cards -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon">🧠</div>
+          <div class="metric-label">ML Prediction</div>
+          <div class="metric-value" id="met-ml">—</div>
+          <div class="metric-sub" id="met-ml-conf">—% confidence</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">📊</div>
+          <div class="metric-label">Spending Ratio</div>
+          <div class="metric-value" id="met-ratio">—</div>
+          <div class="metric-sub">of income</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">🏦</div>
+          <div class="metric-label">EMI Risk</div>
+          <div class="metric-value" id="met-emi">—</div>
+          <div class="metric-sub" id="met-emi-ratio">—% of income</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">🆘</div>
+          <div class="metric-label">Emergency Fund</div>
+          <div class="metric-value" id="met-emerg">—</div>
+          <div class="metric-sub" id="met-emerg-months">— months to save</div>
+        </div>
+      </div>
+
+      <!-- Recommendations & Tips -->
+      <div class="recs-tips-grid">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">📋 Budget Recommendations</h2>
+          </div>
+          <div class="recs-list" id="recs-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🌟 Financial Tips</h2>
+          </div>
+          <div class="tips-list" id="tips-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis-loading hidden" id="analysis-loading">
+      <div class="loader-ring"></div>
+      <p>Gemini AI is analyzing your finances…</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ CHAT ═════════ -->
+  <section class="page" id="page-chat">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">AI Financial Chat</h1>
+        <p class="page-subtitle">Ask anything about budgeting, savings & investments</p>
+      </div>
+      <button class="btn btn-ghost" id="btn-clear-chat">🗑️ Clear Chat</button>
+    </div>
+
+    <div class="chat-container">
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-bubble assistant-bubble">
+          <div class="bubble-avatar">🤖</div>
+          <div class="bubble-content">
+            <div class="bubble-text">Namaste! 🙏 I'm SpendSmart AI, your personal finance advisor. I can help you with budgeting, savings strategies, EMI analysis, tax-saving tips, and more — tailored for Indian users.<br><br>How can I help you today?</div>
+            <div class="bubble-time">Now</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-suggestions" id="chat-suggestions">
+        <button class="suggestion-chip" data-msg="How can I save more money this month?">💰 Save more money</button>
+        <button class="suggestion-chip" data-msg="What is the 50-30-20 rule?">📊 50-30-20 rule</button>
+        <button class="suggestion-chip" data-msg="How should I invest my savings in India?">📈 Investing in India</button>
+        <button class="suggestion-chip" data-msg="How do I build an emergency fund?">🆘 Emergency fund</button>
+        <button class="suggestion-chip" data-msg="Explain 80C tax deductions">📑 80C Tax savings</button>
+        <button class="suggestion-chip" data-msg="What are the best SIP mutual funds for beginners?">🏦 Best SIP funds</button>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="chat-lang-toggle">
+          <button class="lang-btn active" id="lang-en" data-lang="en">EN</button>
+          <button class="lang-btn" id="lang-hi" data-lang="hi">हि</button>
+        </div>
+        <div class="chat-input-wrap">
+          <textarea class="chat-textarea" id="chat-input" placeholder="Ask about budgeting, savings, investments…" rows="1" maxlength="2000"></textarea>
+          <button class="chat-send-btn" id="chat-send-btn" aria-label="Send message">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="chat-disclaimer">⚠️ AI-generated advice for educational purposes only. Consult a SEBI-registered advisor for major decisions.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ HISTORY ══════ -->
+  <section class="page" id="page-history">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Report History</h1>
+        <p class="page-subtitle">All your past financial analyses</p>
+      </div>
+      <button class="btn btn-ghost" id="btn-refresh-history">🔄 Refresh</button>
+    </div>
+
+    <div class="history-loading hidden" id="history-loading">
+      <div class="loader-ring"></div>
+      <p>Loading your reports…</p>
+    </div>
+    <div class="history-empty hidden" id="history-empty">
+      <div class="placeholder-icon">📅</div>
+      <h2>No Reports Yet</h2>
+      <p>Run your first financial analysis to see reports here.</p>
+      <button class="btn btn-primary" onclick="showSection('analysis')">Go to Analysis →</button>
+    </div>
+    <div class="history-list" id="history-list"></div>
+  </section>
+
+</main>
+
+<!-- ─── TOAST CONTAINER ─────────────────────────────────────────────── -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ─── REPORT MODAL ────────────────────────────────────────────────── -->
+<div class="modal-overlay hidden" id="report-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title">Report Details</h2>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
