@@ -6,35 +6,54 @@
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
+  // 1. Check if URI exists to prevent cryptic Mongoose errors if .env fails to load
+  if (!process.env.MONGODB_URI) {
+    console.error("❌ MONGODB_URI is undefined. Check your .env file.");
+    if (process.env.NODE_ENV === "production") {
+      process.exit(1);
+    }
+    console.warn("⚠️ Running WITHOUT MongoDB — DB-dependent routes will fail.\n");
+    return;
+  }
+
   try {
+    // 2. Increased timeout to 10000ms for Atlas cloud latency, DNS lookup, and TLS handshakes
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      // Mongoose 8.x does not need useNewUrlParser / useUnifiedTopology
-      serverSelectionTimeoutMS: 5000, // fail fast so dev server starts quickly
+      serverSelectionTimeoutMS: 10000,
     });
 
     console.log(`✅ MongoDB connected: ${conn.connection.host}`);
-
-    // Graceful shutdown
-    const gracefulShutdown = async (signal) => {
-  await mongoose.connection.close();
-  console.log(`🔌 MongoDB connection closed via ${signal}`);
-  process.exit(0);
-  };
-  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
-  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
   } catch (error) {
     console.error(`❌ MongoDB connection error: ${error.message}`);
 
     if (process.env.NODE_ENV === "production") {
-      // In production, a missing DB is fatal
       process.exit(1);
     } else {
-      // In development, keep the server running so Gemini API & static files still work.
-      // Routes that need the DB will return 500 errors per-request (handled by globalErrorHandler).
-      console.warn("⚠️  Running WITHOUT MongoDB — DB-dependent routes will return errors.");
-      console.warn("    Install & start MongoDB, or set MONGODB_URI to an Atlas connection string.\n");
+      console.warn("⚠️ Running WITHOUT MongoDB — DB-dependent routes will return errors.");
+      console.warn("   Ensure your IP is whitelisted in Atlas and MONGODB_URI is correct.\n");
     }
   }
 };
+
+// 3. Monitor ongoing connection state for runtime drops
+mongoose.connection.on("disconnected", () => {
+  console.warn("⚠️ MongoDB connection lost. Reconnecting...");
+});
+
+mongoose.connection.on("error", (err) => {
+  console.error(`❌ MongoDB runtime error: ${err.message}`);
+});
+
+// 4. Graceful shutdown listeners (placed outside connectDB so they always register)
+const gracefulShutdown = async (signal) => {
+  if (mongoose.connection.readyState === 1) {
+    await mongoose.connection.close();
+    console.log(`🔌 MongoDB connection closed via ${signal}`);
+  }
+  process.exit(0);
+};
+
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 
 module.exports = connectDB;
