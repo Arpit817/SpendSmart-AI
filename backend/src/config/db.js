@@ -1,59 +1,45 @@
 /**
- * db.js — MongoDB connection via Mongoose
- * Connects to the URI defined in .env (local or Atlas)
+ * db.js - Vercel Serverless MongoDB connection via Mongoose
  */
 
 const mongoose = require("mongoose");
 
+// This variable caches the connection so Vercel can reuse it
+let isConnected = false;
+
 const connectDB = async () => {
-  // 1. Check if URI exists to prevent cryptic Mongoose errors if .env fails to load
+  // Check if URI exists to prevent cryptic errors
   if (!process.env.MONGODB_URI) {
-    console.error("❌ MONGODB_URI is undefined. Check your .env file.");
-    if (process.env.NODE_ENV === "production") {
-      process.exit(1);
-    }
-    console.warn("⚠️ Running WITHOUT MongoDB — DB-dependent routes will fail.\n");
+    console.error("❌ MONGODB_URI is undefined. Check your Vercel Environment Variables.");
+    return;
+  }
+
+  if (isConnected){
+    console.log("Using existing MongoDB connection");
     return;
   }
 
   try {
-    // 2. Increased timeout to 10000ms for Atlas cloud latency, DNS lookup, and TLS handshakes
+    // Increased timeout to 10000ms for Atlas cloud latency
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       serverSelectionTimeoutMS: 10000,
     });
 
-    console.log(`✅ MongoDB connected: ${conn.connection.host}`);
+    isConnected = conn.connections[0].readyState == 1;
+    console.log(`MongoDB connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error(`❌ MongoDB connection error: ${error.message}`);
-
-    if (process.env.NODE_ENV === "production") {
-      process.exit(1);
-    } else {
-      console.warn("⚠️ Running WITHOUT MongoDB — DB-dependent routes will return errors.");
-      console.warn("   Ensure your IP is whitelisted in Atlas and MONGODB_URI is correct.\n");
-    }
+    console.error(`MongoDB connection error: ${error.message}`);
   }
 };
 
-// 3. Monitor ongoing connection state for runtime drops
+// Monitor ongoing connection state for runtime drops
 mongoose.connection.on("disconnected", () => {
-  console.warn("⚠️ MongoDB connection lost. Reconnecting...");
+  console.warn("⚠️ MongoDB connection lost. Resetting cache...");
+  isConnected = false; // Reset the cache so the next request tries to reconnect
 });
 
 mongoose.connection.on("error", (err) => {
   console.error(`❌ MongoDB runtime error: ${err.message}`);
 });
-
-// 4. Graceful shutdown listeners (placed outside connectDB so they always register)
-const gracefulShutdown = async (signal) => {
-  if (mongoose.connection.readyState === 1) {
-    await mongoose.connection.close();
-    console.log(`🔌 MongoDB connection closed via ${signal}`);
-  }
-  process.exit(0);
-};
-
-process.on("SIGINT", () => gracefulShutdown("SIGINT"));
-process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 
 module.exports = connectDB;
