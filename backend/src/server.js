@@ -20,11 +20,15 @@ const analysisRoutes = require("./routes/analysisRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const historyRoutes = require("./routes/historyRoutes");
 
-// ── Connect Database ───────────────────────────────────────────────────────
-connectDB();
 
 // ── Create Express App ─────────────────────────────────────────────────────
 const app = express(); // <--- MOVE THIS UP HERE
+
+// Force Vercel to wait for the database connection on every request
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 // Static files will be registered after security middleware below
 
@@ -149,13 +153,13 @@ app.use(notFound);
 app.use(globalErrorHandler);
 
 // ── Start Server ───────────────────────────────────────────────────────────
-const PORT = parseInt(process.env.PORT) || 5000;
-app.listen(PORT, () => {
-  console.log(`\n🚀 SpendSmart AI Backend running on port ${PORT}`);
-  console.log(`   Environment : ${process.env.NODE_ENV || "development"}`);
-  console.log(`   AI Provider : ${process.env.AI_PROVIDER || "gemini"}`);
-  console.log(`   Health Check: http://localhost:${PORT}/health`);
-  console.log(`   API Index   : http://localhost:${PORT}/api\n`);
-});
+if (process.env.NODE_ENV !== "production") {
+  const PORT = parseInt(process.env.PORT) || 5000;
+  app.listen(PORT, () => {
+    console.log(`\n🚀 SpendSmart AI Backend running locally on port ${PORT}`);
+    console.log(`   Environment : ${process.env.NODE_ENV || "development"}`);
+    console.log(`   AI Provider : ${process.env.AI_PROVIDER || "gemini"}`);
+  });
+}
 
 module.exports = app;
