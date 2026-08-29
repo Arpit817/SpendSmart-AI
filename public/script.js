@@ -1,7 +1,7 @@
 /* ─── SpendSmart AI — Frontend Script ─── */
 'use strict';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 // ── Session ID (persist across refreshes) ──────────────────────────────────
 function getSessionId() {
