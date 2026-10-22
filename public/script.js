@@ -20,6 +20,27 @@ let state = {
   analysis: null,
   chatLang: 'en',
   chatLoading: false,
+  hasProfile: false,
+};
+
+const DEMO_PROFILE = {
+  name: 'Aarav',
+  language: 'en',
+  income: 85000,
+  expenses: {
+    rent: 25000,
+    food: 9000,
+    travel: 4500,
+    shopping: 5000,
+    bills: 6500,
+    emi: 7000,
+    others: 3500,
+  },
+  savingsGoal: {
+    targetAmount: 300000,
+    targetMonths: 18,
+    description: 'Emergency fund + travel',
+  },
 };
 
 // ── Utilities ───────────────────────────────────────────────────────────────
@@ -40,6 +61,7 @@ function showSection(name) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   $(`page-${name}`).classList.add('active');
   $(`nav-${name}`)?.classList.add('active');
+  if (name === 'dashboard') setOnboardingState(!state.hasProfile);
   if (name === 'history') loadHistory();
   // Close mobile sidebar
   $('sidebar').classList.remove('open');
@@ -75,13 +97,24 @@ checkHealth();
 async function loadProfile() {
   try {
     const r = await fetch(`${API}/user/${SESSION_ID}`);
-    if (!r.ok) return;
+    if (!r.ok) {
+      state.user = null;
+      state.hasProfile = false;
+      setOnboardingState(true);
+      return;
+    }
     const { data } = await r.json();
     state.user = data;
+    state.hasProfile = true;
     fillForm(data);
     updateDashboardStats(data);
     updatePreview();
-  } catch { /* no profile yet */ }
+    setOnboardingState(false);
+  } catch {
+    state.user = null;
+    state.hasProfile = false;
+    setOnboardingState(true);
+  }
 }
 
 function fillForm(u) {
@@ -100,6 +133,30 @@ function fillForm(u) {
     $('inp-goal-desc').value = u.savingsGoal.description || '';
   }
   $('dash-name').textContent = u.name || 'there';
+}
+
+function setOnboardingState(showOnboarding) {
+  const onboarding = $('onboarding-panel');
+  const subtitle = $('dashboard-subtitle');
+  const sections = ['dash-stats', 'status-banner', 'dashboard-grid', 'tips-card'];
+
+  onboarding?.classList.toggle('hidden', !showOnboarding);
+  sections.forEach(id => $(id)?.classList.toggle('hidden', showOnboarding));
+
+  if (showOnboarding) {
+    $('dash-name').textContent = 'there';
+    if (subtitle) subtitle.textContent = 'Start with your profile to unlock your dashboard insights.';
+    $('status-banner').classList.add('hidden');
+  } else if (subtitle) {
+    subtitle.textContent = "Here's your financial snapshot for this month";
+  }
+}
+
+function applyDemoData() {
+  fillForm(DEMO_PROFILE);
+  updatePreview();
+  showSection('profile');
+  toast('Demo data loaded in the form. Review and save to continue.', 'info');
 }
 
 // ── Live preview on profile form ────────────────────────────────────────────
@@ -173,10 +230,12 @@ $('profile-form').addEventListener('submit', async e => {
     if (!r.ok) throw new Error(data.message || 'Failed to save');
 
     state.user = data.data.user;
+    state.hasProfile = true;
     toast('Profile saved successfully! ✓', 'success');
     $('dash-name').textContent = payload.name;
     updateDashboardStats(state.user);
     renderExpenseChart(state.user);
+    setOnboardingState(false);
     showSection('dashboard');
   } catch (err) {
     toast(err.message, 'error');
@@ -537,6 +596,14 @@ window.showSection = showSection;
 window.openReport  = openReport;
 
 (async function init() {
+  $('current-year').textContent = new Date().getFullYear();
+  $('btn-start-onboarding')?.addEventListener('click', () => showSection('profile'));
+  $('btn-use-demo')?.addEventListener('click', applyDemoData);
+
   await loadProfile();
+  const params = new URLSearchParams(window.location.search);
+  if (!state.hasProfile && params.get('demo') === '1') {
+    applyDemoData();
+  }
   updatePreview();
 })();
