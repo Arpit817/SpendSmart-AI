@@ -106,13 +106,23 @@ app.get("/health", (req, res) => {
 
 // ── Static Files & Frontend Root (after security middleware) ──────────────
 app.use(express.static(path.join(__dirname, '../../public')));
-app.get('/', (req, res) => {
+const pageLimiter = rateLimit({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+  max: parseInt(process.env.PAGE_RATE_LIMIT_MAX) || 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many page requests. Please try again shortly.",
+  },
+});
+app.get('/', pageLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/index.html'));
 });
-app.get('/app', (req, res) => {
+app.get('/app', pageLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/app.html'));
 });
-app.get('/app/*', (req, res) => {
+app.get('/app/*', pageLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/app.html'));
 });
 
