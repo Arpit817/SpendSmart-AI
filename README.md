@@ -56,3 +56,19 @@ cp .env.example .env
 
 # 4. Start the development server
 npm run dev
+```
+
+### App Routes
+
+- `/` → Public marketing landing page
+- `/app` → SpendSmart AI application dashboard (profile, analysis, chat, history)
+
+### Run and open locally
+
+```bash
+# from /backend
+npm run dev
+# then open:
+# http://localhost:5000/     (landing page)
+# http://localhost:5000/app  (application dashboard)
+```
